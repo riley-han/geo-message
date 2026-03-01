@@ -128,3 +128,14 @@
     cursor: pointer;
   }
 }
+
+/* Hide scrollbar on mobile only; scrolling still works */
+@media (max-width: 767px) {
+  .scrollbar-hide-mobile::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide-mobile {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+}
