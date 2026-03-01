@@ -3,7 +3,7 @@
 import { Lock, MapPin } from "lucide-react";
 import { useCurrentLocation } from "./components/current-location";
 import TextEditor from "./components/text-editor";
-import { mockMessages } from "./mock-data";
+import { mockMessages } from "../mock-data";
 import { getDistanceMeters, GEOFENCE_RADIUS_METERS } from "@/app/utils/geo-location";
 
 
