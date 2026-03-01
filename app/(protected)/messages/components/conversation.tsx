@@ -1,5 +1,7 @@
+"use client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import UnreadNotifications from "./unread-notifications";
+import { useRouter } from "next/navigation";
 interface ConversationProps {
   title?: string;
   unReadCount: number;
@@ -7,6 +9,7 @@ interface ConversationProps {
   imageUrl?: string;
   contactName?: string;
   isGroup: boolean;
+  conversationId: string;
 }
 
 const Conversation = ({
@@ -16,11 +19,21 @@ const Conversation = ({
   imageUrl,
   contactName,
   isGroup,
+  conversationId,
 }: ConversationProps) => {
   const avatarAltText = isGroup ? title?.charAt(0) : contactName?.charAt(0);
 
+  const router = useRouter();
+
+  const handleClick = () => {
+    router.push(`messages/conversation/${conversationId}`);
+  };
+
   return (
-    <div className="flex items-center justify-between gap-3 border-b p-3 md:p-2 border-gray-200 min-h-[4.5rem] md:h-20 hover:bg-gray-50">
+    <div
+      className="flex items-center justify-between gap-3 border-b p-3 md:p-2 border-gray-200 min-h-[4.5rem] md:h-20 hover:bg-gray-50"
+      onClick={handleClick}
+    >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <div className="flex-shrink-0">
           <Avatar size="lg">

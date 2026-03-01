@@ -4,12 +4,12 @@ import { Lock, MapPin } from "lucide-react";
 import { useCurrentLocation } from "./components/current-location";
 import TextEditor from "./components/text-editor";
 import { mockMessages } from "../mock-data";
-import { getDistanceMeters, GEOFENCE_RADIUS_METERS } from "@/app/utils/geo-location";
-
+import {
+  getDistanceMeters,
+  GEOFENCE_RADIUS_METERS,
+} from "@/app/utils/geo-location";
 
 const myUserId = "123";
-
-
 
 const ConversationPage = () => {
   const currentLocation = useCurrentLocation();
@@ -76,9 +76,7 @@ const ConversationPage = () => {
                 </span>
                 <div
                   className={`max-w-[85%] rounded-lg px-3 py-2 ${
-                    isFromMe
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
+                    isFromMe ? "bg-primary text-primary-foreground" : "bg-muted"
                   }`}
                 >
                   {message.content}
