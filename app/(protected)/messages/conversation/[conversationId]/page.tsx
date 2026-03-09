@@ -12,12 +12,13 @@ import { useParams } from "next/navigation";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useSendMessage } from "../../hooks/use-send-message";
 import ConversationMembers from "./components/conversation-members";
+import MessageListSkeleton from "./components/message-skeleton";
 
 const ConversationPage = () => {
   const { conversationId } = useParams();
   const { user } = useCurrentUser();
   const currentLocation = useCurrentLocation();
-  const { messages, refetchMessages } = useGetMessages({
+  const { messages, isLoading: isLoadingMessages, refetchMessages } = useGetMessages({
     conversationId: conversationId as string,
   });
   const { sendMessage, isLoading: isSending } = useSendMessage();
@@ -30,7 +31,9 @@ const ConversationPage = () => {
       <div className="relative flex flex-col h-screen w-full sm:w-full md:w-1/4 md:mx-auto md:max-w-sm">
         <ConversationMembers conversationId={conversationId as string} />
         <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide-mobile flex flex-col gap-2 p-2 pb-20">
-          {messages.map((message) => {
+          {isLoadingMessages ? (
+            <MessageListSkeleton />
+          ) : messages.map((message) => {
             const isFromMe = message.sender_id === user?.id;
 
             let isUnlocked = true;
@@ -96,7 +99,7 @@ const ConversationPage = () => {
               </div>
             );
           })}
-        </div>
+          </div>
         <div className="absolute inset-x-0 bottom-0 bg-background p-2">
           <TextEditor
             isLoading={isSending}

@@ -11,11 +11,13 @@ export type Conversation = {
 
 export const useGetConversations = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const controller = new AbortController();
 
     const run = async () => {
+      setIsLoading(true);
       try {
         const res = await fetch("/api/messages?limit=10", {
           signal: controller.signal,
@@ -34,6 +36,8 @@ export const useGetConversations = () => {
       } catch (e) {
         if ((e as { name?: string }).name === "AbortError") return;
         setConversations([]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -42,5 +46,5 @@ export const useGetConversations = () => {
     return () => controller.abort();
   }, []);
 
-  return conversations;
+  return { conversations, isLoading };
 };

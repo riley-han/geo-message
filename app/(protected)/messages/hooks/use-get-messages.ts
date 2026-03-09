@@ -24,6 +24,7 @@ export type conversationRequestParams = {
 
 export const useGetMessages = (params: conversationRequestParams) => {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchMessages = async () => {
     if (!params.conversationId) return;
@@ -49,9 +50,10 @@ export const useGetMessages = (params: conversationRequestParams) => {
   useEffect(() => {
     if (!params.conversationId) return;
 
-    fetchMessages();
+    setIsLoading(true);
+    fetchMessages().finally(() => setIsLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.conversationId]);
 
-  return { messages, refetchMessages: fetchMessages };
+  return { messages, isLoading, refetchMessages: fetchMessages };
 };
