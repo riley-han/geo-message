@@ -17,18 +17,32 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const conversationId = searchParams.get("conversationId");
 
-  const { data, error } = await supabase
-    .from("messages")
-    .select(
-      "id, content, is_geo_locked, location, created_at, sender_id, profiles:sender_id(display_name)"
-    )
-    .eq("conversation_id", conversationId)
-    .order("created_at", { ascending: true });
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  const [messagesResult, membersResult] = await Promise.all([
+    supabase
+      .from("messages")
+      .select(
+        "id, content, is_geo_locked, location, created_at, sender_id, profiles:sender_id(display_name)"
+      )
+      .eq("conversation_id", conversationId)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("conversation_members")
+      .select("id, user_id, created_at, profiles:user_id(display_name)")
+      .eq("conversation_id", conversationId),
+  ]);
+
+  if (messagesResult.error) {
+    return NextResponse.json({ error: messagesResult.error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ messages: data ?? [] });
+  if (membersResult.error) {
+    return NextResponse.json({ error: membersResult.error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({
+    messages: messagesResult.data ?? [],
+    members: membersResult.data ?? [],
+  });
 }
 
 export async function POST(request: Request) {

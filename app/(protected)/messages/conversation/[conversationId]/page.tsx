@@ -3,7 +3,7 @@
 import { Lock, MapPin } from "lucide-react";
 import { useCurrentLocation } from "./components/current-location";
 import TextEditor from "./components/text-editor";
-import { useGetMessages } from "../../hooks/use-get-messages";
+import { useGetConversationData } from "../../hooks/use-get-messages";
 import {
   getDistanceMeters,
   GEOFENCE_RADIUS_METERS,
@@ -18,7 +18,7 @@ const ConversationPage = () => {
   const { conversationId } = useParams();
   const { user } = useCurrentUser();
   const currentLocation = useCurrentLocation();
-  const { messages, isLoading: isLoadingMessages, refetchMessages } = useGetMessages({
+  const { messages, members, isLoading: isLoadingMessages, refetch } = useGetConversationData({
     conversationId: conversationId as string,
   });
   const { sendMessage, isLoading: isSending } = useSendMessage();
@@ -29,7 +29,11 @@ const ConversationPage = () => {
   return (
     <div className="h-screen">
       <div className="relative flex flex-col h-screen w-full sm:w-full md:w-1/4 md:mx-auto md:max-w-sm">
-        <ConversationMembers conversationId={conversationId as string} />
+        <ConversationMembers
+          conversationId={conversationId as string}
+          members={members}
+          onMembersChanged={refetch}
+        />
         <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide-mobile flex flex-col gap-2 p-2 pb-20">
           {isLoadingMessages ? (
             <MessageListSkeleton />
@@ -109,7 +113,7 @@ const ConversationPage = () => {
                 content
               );
               if (success) {
-                refetchMessages();
+                refetch();
               }
             }}
           />
