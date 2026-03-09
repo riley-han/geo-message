@@ -65,11 +65,28 @@ const ConversationPage = () => {
     setRealtimeMessages([]);
   }, [messages]);
 
+  const memberNamesBySenderId = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const m of members) {
+      if (m.profiles?.display_name) {
+        map.set(m.user_id, m.profiles.display_name);
+      }
+    }
+    return map;
+  }, [members]);
+
   const allMessages = useMemo(() => {
     const fetchedIds = new Set(messages.map((m) => m.id));
-    const uniqueRealtime = realtimeMessages.filter((m) => !fetchedIds.has(m.id));
+    const uniqueRealtime = realtimeMessages
+      .filter((m) => !fetchedIds.has(m.id))
+      .map((m) => ({
+        ...m,
+        profiles: m.profiles ?? {
+          display_name: memberNamesBySenderId.get(m.sender_id) ?? "Unknown",
+        },
+      }));
     return [...messages, ...uniqueRealtime];
-  }, [messages, realtimeMessages]);
+  }, [messages, realtimeMessages, memberNamesBySenderId]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -81,13 +98,13 @@ const ConversationPage = () => {
   }
   return (
     <div className="h-screen">
-      <div className="relative flex flex-col h-screen w-full sm:w-full md:w-1/4 md:mx-auto md:max-w-sm">
+      <div className="flex flex-col h-screen w-full sm:w-full md:w-1/4 md:mx-auto md:max-w-sm">
         <ConversationMembers
           conversationId={conversationId as string}
           members={members}
           onMembersChanged={refetch}
         />
-        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto scrollbar-hide-mobile flex flex-col gap-2 p-2 pb-20">
+        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto scrollbar-hide-mobile flex flex-col gap-2 p-2">
           {isLoadingMessages ? (
             <MessageListSkeleton />
           ) : allMessages.map((message) => {
@@ -157,7 +174,7 @@ const ConversationPage = () => {
             );
           })}
           </div>
-        <div className="absolute inset-x-0 bottom-0 bg-background p-2">
+        <div className="flex-shrink-0 bg-background p-2">
           <TextEditor
             isLoading={isSending}
             onSend={async (content) => {
