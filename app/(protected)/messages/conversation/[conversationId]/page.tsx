@@ -51,7 +51,7 @@ const ConversationPage = () => {
           setRealtimeMessages((prev) => [...prev, msg]);
         }
       )
-      .subscribe((status, err) => {
+      .subscribe((status: string, err?: Error) => {
         console.log(`[Realtime] Channel status: ${status}`, err ?? "");
       });
 
@@ -74,6 +74,7 @@ const ConversationPage = () => {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [allMessages.length]);
+
 
   if (!conversationId) {
     return <div>Conversation not found</div>;
