@@ -9,10 +9,11 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { MessageSquareText } from "lucide-react";
-import SelectContact from "./select-contact";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCreateConversation } from "../hooks/use-create-conversation";
 
 interface NewMessageDrawerProps {
   open: boolean;
@@ -20,10 +21,21 @@ interface NewMessageDrawerProps {
 }
 
 const NewMessageDrawer = ({ open, handleIsOpen }: NewMessageDrawerProps) => {
-  const [selectedContact, setSelectedContact] = useState<string | undefined>();
-  const [messageText, setMessageText] = useState("");
+  const [title, setTitle] = useState("");
+  const { createConversation, isLoading, error } = useCreateConversation();
+  const router = useRouter();
 
-  console.log(messageText);
+  const handleSubmit = async () => {
+    if (!title.trim()) return;
+
+    const conversation = await createConversation(title.trim());
+
+    if (conversation) {
+      setTitle("");
+      handleIsOpen();
+      router.push(`/messages/conversation/${conversation.id}`);
+    }
+  };
 
   return (
     <Drawer open={open} onOpenChange={handleIsOpen} direction="right">
@@ -35,25 +47,30 @@ const NewMessageDrawer = ({ open, handleIsOpen }: NewMessageDrawerProps) => {
       <DrawerContent>
         <div className="mx-auto w-full max-w-sm">
           <DrawerHeader>
-            <DrawerTitle>New Message</DrawerTitle>
+            <DrawerTitle>New Conversation</DrawerTitle>
           </DrawerHeader>
           <div className="px-4 pb-4">
-            <SelectContact
-              value={selectedContact}
-              onChange={setSelectedContact}
+            <label htmlFor="conv-title" className="text-sm font-medium">
+              Conversation title
+            </label>
+            <Input
+              id="conv-title"
+              className="mt-2"
+              placeholder="e.g. Hawaii Trip"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
             />
-
-            <div className="mt-4">
-              <Textarea
-                value={messageText}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                  setMessageText(e.target.value);
-                }}
-              />
-            </div>
           </div>
+          {error && (
+            <p className="px-4 text-sm text-red-500">{error}</p>
+          )}
           <DrawerFooter>
-            <Button disabled={!selectedContact}>Submit</Button>
+            <Button
+              disabled={!title.trim() || isLoading}
+              onClick={() => void handleSubmit()}
+            >
+              {isLoading ? "Creating..." : "Create"}
+            </Button>
             <DrawerClose asChild>
               <Button variant="outline">Cancel</Button>
             </DrawerClose>
