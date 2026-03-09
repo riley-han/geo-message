@@ -25,40 +25,33 @@ export type conversationRequestParams = {
 export const useGetMessages = (params: conversationRequestParams) => {
   const [messages, setMessages] = useState<Message[]>([]);
 
+  const fetchMessages = async () => {
+    if (!params.conversationId) return;
+
+    try {
+      const res = await fetch(
+        `/api/conversation?conversationId=${params.conversationId}`,
+        { cache: "no-store" }
+      );
+
+      if (!res.ok) {
+        setMessages([]);
+        return;
+      }
+
+      const data = (await res.json()) as { messages?: Message[] };
+      setMessages(Array.isArray(data.messages) ? data.messages : []);
+    } catch {
+      setMessages([]);
+    }
+  };
+
   useEffect(() => {
     if (!params.conversationId) return;
 
-    const controller = new AbortController();
-
-    const run = async () => {
-      try {
-        const res = await fetch(
-          `/api/conversation?conversationId=${params.conversationId}`,
-          {
-            signal: controller.signal,
-            cache: "no-store",
-          }
-        );
-
-        if (!res.ok) {
-          setMessages([]);
-          return;
-        }
-
-        const data = (await res.json()) as { messages?: Message[] };
-        setMessages(Array.isArray(data.messages) ? data.messages : []);
-      } catch (e) {
-        if ((e as { name?: string }).name === "AbortError") return;
-        setMessages([]);
-      }
-    };
-
-    run();
-
-    return () => controller.abort();
+    fetchMessages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.conversationId]);
 
-  console.log(messages, "what is this data");
-
-  return messages;
+  return { messages, refetchMessages: fetchMessages };
 };

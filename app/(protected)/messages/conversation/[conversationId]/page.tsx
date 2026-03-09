@@ -10,15 +10,17 @@ import {
 } from "@/app/utils/geo-location";
 import { useParams } from "next/navigation";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useSendMessage } from "../../hooks/use-send-message";
 import ConversationMembers from "./components/conversation-members";
 
 const ConversationPage = () => {
   const { conversationId } = useParams();
   const { user } = useCurrentUser();
   const currentLocation = useCurrentLocation();
-  const messages = useGetMessages({
+  const { messages, refetchMessages } = useGetMessages({
     conversationId: conversationId as string,
   });
+  const { sendMessage, isLoading: isSending } = useSendMessage();
 
   if (!conversationId) {
     return <div>Conversation not found</div>;
@@ -96,7 +98,18 @@ const ConversationPage = () => {
           })}
         </div>
         <div className="absolute inset-x-0 bottom-0 bg-background p-2">
-          <TextEditor />
+          <TextEditor
+            isLoading={isSending}
+            onSend={async (content) => {
+              const success = await sendMessage(
+                conversationId as string,
+                content
+              );
+              if (success) {
+                refetchMessages();
+              }
+            }}
+          />
         </div>
       </div>
     </div>
