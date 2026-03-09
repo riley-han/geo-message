@@ -70,5 +70,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  const { error: memberError } = await supabase
+    .from("conversation_members")
+    .insert({ conversation_id: data.id, user_id: user.id });
+
+  if (memberError) {
+    return NextResponse.json({ error: memberError.message }, { status: 500 });
+  }
+
   return NextResponse.json({ conversation: data }, { status: 201 });
 }
