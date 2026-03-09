@@ -1,6 +1,38 @@
-import { generateMockConversations } from "../mock-data/mock-data";
+"use client";
+
+import { useEffect, useState } from "react";
+import type { Conversation } from "../mock-data/mock-data";
 
 export const useGetConversations = () => {
-  const conversations = generateMockConversations(10);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const run = async () => {
+      try {
+        const res = await fetch("/api/messages?limit=10", {
+          signal: controller.signal,
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          setConversations([]);
+          return;
+        }
+
+        const data = (await res.json()) as { conversations?: Conversation[] };
+        setConversations(Array.isArray(data.conversations) ? data.conversations : []);
+      } catch (e) {
+        if ((e as { name?: string }).name === "AbortError") return;
+        setConversations([]);
+      }
+    };
+
+    run();
+
+    return () => controller.abort();
+  }, []);
+
   return conversations;
 };
