@@ -19,16 +19,26 @@ export async function GET(request: Request) {
   const limit = limitParam ? Math.min(Math.max(Number(limitParam), 1), 50) : 10;
 
   const { data, error } = await supabase
-    .from("conversations")
-    .select("id, title")
-    .limit(limit)
-    .order("updated_at", { ascending: false });
+    .from("conversation_members")
+    .select("conversations:conversation_id(id, title, updated_at)")
+    .eq("user_id", user.id)
+    .limit(limit);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ conversations: data ?? [] });
+  const conversations = (data ?? [])
+    .map((row) => {
+      const conv = row.conversations;
+      return Array.isArray(conv) ? conv[0] : conv;
+    })
+    .filter(
+      (c): c is { id: string; title: string; updated_at: string } => !!c
+    )
+    .sort((a, b) => (b.updated_at > a.updated_at ? 1 : -1));
+
+  return NextResponse.json({ conversations });
 }
 
 export async function POST(request: Request) {

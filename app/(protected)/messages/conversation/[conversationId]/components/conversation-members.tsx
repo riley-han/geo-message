@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { UserPlus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { UserPlus, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -26,6 +27,23 @@ const ConversationMembers = ({ conversationId }: ConversationMembersProps) => {
   const { addMember, isLoading, error } = useAddConversationMember();
   const [selectedUserId, setSelectedUserId] = useState<string | undefined>();
   const [showSelect, setShowSelect] = useState(false);
+  const [isLeaving, setIsLeaving] = useState(false);
+  const router = useRouter();
+
+  const handleLeave = async () => {
+    setIsLeaving(true);
+    try {
+      const res = await fetch(
+        `/api/conversation/members?conversationId=${conversationId}`,
+        { method: "DELETE" }
+      );
+      if (res.ok) {
+        router.push("/messages");
+      }
+    } finally {
+      setIsLeaving(false);
+    }
+  };
 
   const memberUserIds = useMemo(
     () => new Set(members.map((m) => m.user_id)),
@@ -60,16 +78,27 @@ const ConversationMembers = ({ conversationId }: ConversationMembersProps) => {
             {member.profiles?.display_name ?? "Unknown"}
           </span>
         ))}
-        {!showSelect && (
+        <div className="flex items-center gap-1 ml-auto flex-shrink-0">
+          {!showSelect && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-6"
+              onClick={() => setShowSelect(true)}
+            >
+              <UserPlus className="size-3.5" />
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"
-            className="flex-shrink-0 size-6"
-            onClick={() => setShowSelect(true)}
+            className="size-6 text-red-500 hover:text-red-600 hover:bg-red-50"
+            disabled={isLeaving}
+            onClick={() => void handleLeave()}
           >
-            <UserPlus className="size-3.5" />
+            <LogOut className="size-3.5" />
           </Button>
-        )}
+        </div>
       </div>
 
       {showSelect && (
