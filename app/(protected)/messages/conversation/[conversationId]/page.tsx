@@ -10,6 +10,7 @@ import {
 } from "@/app/utils/geo-location";
 import { useParams } from "next/navigation";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import ConversationMembers from "./components/conversation-members";
 
 const ConversationPage = () => {
   const { conversationId } = useParams();
@@ -25,6 +26,7 @@ const ConversationPage = () => {
   return (
     <div className="h-screen">
       <div className="relative flex flex-col h-screen w-full sm:w-full md:w-1/4 md:mx-auto md:max-w-sm">
+        <ConversationMembers conversationId={conversationId as string} />
         <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide-mobile flex flex-col gap-2 p-2 pb-20">
           {messages.map((message) => {
             const isFromMe = message.sender_id === user?.id;
