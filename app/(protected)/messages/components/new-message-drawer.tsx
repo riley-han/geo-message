@@ -21,9 +21,9 @@ interface NewMessageDrawerProps {
 
 const NewMessageDrawer = ({ open, handleIsOpen }: NewMessageDrawerProps) => {
   const [selectedContact, setSelectedContact] = useState<string | undefined>();
-  const [messageText, setMessageText] = useState("")
+  const [messageText, setMessageText] = useState("");
 
-  console.log(messageText)
+  console.log(messageText);
 
   return (
     <Drawer open={open} onOpenChange={handleIsOpen} direction="right">
@@ -44,9 +44,12 @@ const NewMessageDrawer = ({ open, handleIsOpen }: NewMessageDrawerProps) => {
             />
 
             <div className="mt-4">
-              <Textarea value={messageText} onChange={(e:React.ChangeEvent<HTMLTextAreaElement>) => {
-                setMessageText(e.target.value)
-              } }/>
+              <Textarea
+                value={messageText}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                  setMessageText(e.target.value);
+                }}
+              />
             </div>
           </div>
           <DrawerFooter>

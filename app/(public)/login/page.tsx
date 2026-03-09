@@ -98,11 +98,7 @@ export default function Login() {
           )}
 
           <div className="mt-4 flex flex-col gap-3">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full"
-            >
+            <Button type="submit" disabled={isSubmitting} className="w-full">
               {isSubmitting ? "Signing in..." : "Sign in"}
             </Button>
             <Button

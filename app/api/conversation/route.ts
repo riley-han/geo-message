@@ -15,18 +15,18 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const limitParam = searchParams.get("limit");
-  const limit = limitParam ? Math.min(Math.max(Number(limitParam), 1), 50) : 10;
+  const conversationId = searchParams.get("conversationId");
 
   const { data, error } = await supabase
-    .from("conversations")
-    .select("id, title")
-    .limit(limit)
-    .order("updated_at", { ascending: false });
-
+    .from("messages")
+    .select(
+      "id, content, is_geo_locked, location, created_at, sender_id, profiles:sender_id(display_name)"
+    )
+    .eq("conversation_id", conversationId)
+    .order("created_at", { ascending: true });
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ conversations: data ?? [] });
+  return NextResponse.json({ messages: data ?? [] });
 }

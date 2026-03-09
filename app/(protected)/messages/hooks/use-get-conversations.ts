@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Conversation } from "../mock-data/mock-data";
+
+export type Conversation = {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+};
 
 export const useGetConversations = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -22,7 +28,9 @@ export const useGetConversations = () => {
         }
 
         const data = (await res.json()) as { conversations?: Conversation[] };
-        setConversations(Array.isArray(data.conversations) ? data.conversations : []);
+        setConversations(
+          Array.isArray(data.conversations) ? data.conversations : []
+        );
       } catch (e) {
         if ((e as { name?: string }).name === "AbortError") return;
         setConversations([]);
