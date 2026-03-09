@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { UserPlus, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,22 +13,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useGetConversationMembers } from "../../../hooks/use-get-conversation-members";
-import { useGetProfiles } from "../../../hooks/use-get-profiles";
+import type { ConversationMember } from "../../../hooks/use-get-conversation-members";
+import type { Profile } from "../../../hooks/use-get-profiles";
 import { useAddConversationMember } from "../../../hooks/use-add-conversation-member";
 
 interface ConversationMembersProps {
   conversationId: string;
+  members: ConversationMember[];
+  onMembersChanged: () => void;
 }
 
-const ConversationMembers = ({ conversationId }: ConversationMembersProps) => {
-  const { members, refetchMembers } = useGetConversationMembers(conversationId);
-  const profiles = useGetProfiles();
+const ConversationMembers = ({ conversationId, members, onMembersChanged }: ConversationMembersProps) => {
   const { addMember, isLoading, error } = useAddConversationMember();
+  const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | undefined>();
   const [showSelect, setShowSelect] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
   const router = useRouter();
+
+  const fetchProfiles = useCallback(async () => {
+    try {
+      const res = await fetch("/api/profiles", { cache: "no-store" });
+      if (res.ok) {
+        const data = (await res.json()) as { profiles?: Profile[] };
+        setProfiles(Array.isArray(data.profiles) ? data.profiles : []);
+      }
+    } catch {
+      setProfiles([]);
+    }
+  }, []);
 
   const handleLeave = async () => {
     setIsLeaving(true);
@@ -63,7 +76,7 @@ const ConversationMembers = ({ conversationId }: ConversationMembersProps) => {
     if (success) {
       setSelectedUserId(undefined);
       setShowSelect(false);
-      refetchMembers();
+      onMembersChanged();
     }
   };
 
@@ -84,7 +97,10 @@ const ConversationMembers = ({ conversationId }: ConversationMembersProps) => {
               variant="ghost"
               size="icon"
               className="size-6"
-              onClick={() => setShowSelect(true)}
+              onClick={() => {
+                setShowSelect(true);
+                void fetchProfiles();
+              }}
             >
               <UserPlus className="size-3.5" />
             </Button>

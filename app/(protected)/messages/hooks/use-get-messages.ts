@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { ConversationMember } from "./use-get-conversation-members";
 
 export type Message = {
   id: string;
@@ -22,11 +23,12 @@ export type conversationRequestParams = {
   conversationId: string;
 };
 
-export const useGetMessages = (params: conversationRequestParams) => {
+export const useGetConversationData = (params: conversationRequestParams) => {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [members, setMembers] = useState<ConversationMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchMessages = async () => {
+  const fetchData = async () => {
     if (!params.conversationId) return;
 
     try {
@@ -37,13 +39,19 @@ export const useGetMessages = (params: conversationRequestParams) => {
 
       if (!res.ok) {
         setMessages([]);
+        setMembers([]);
         return;
       }
 
-      const data = (await res.json()) as { messages?: Message[] };
+      const data = (await res.json()) as {
+        messages?: Message[];
+        members?: ConversationMember[];
+      };
       setMessages(Array.isArray(data.messages) ? data.messages : []);
+      setMembers(Array.isArray(data.members) ? data.members : []);
     } catch {
       setMessages([]);
+      setMembers([]);
     }
   };
 
@@ -51,9 +59,9 @@ export const useGetMessages = (params: conversationRequestParams) => {
     if (!params.conversationId) return;
 
     setIsLoading(true);
-    fetchMessages().finally(() => setIsLoading(false));
+    fetchData().finally(() => setIsLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.conversationId]);
 
-  return { messages, isLoading, refetchMessages: fetchMessages };
+  return { messages, members, isLoading, refetch: fetchData };
 };
