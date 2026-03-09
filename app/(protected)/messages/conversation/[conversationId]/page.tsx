@@ -3,7 +3,7 @@
 import { Lock, MapPin } from "lucide-react";
 import { useCurrentLocation } from "./components/current-location";
 import TextEditor from "./components/text-editor";
-import { useGetConversationData } from "../../hooks/use-get-messages";
+import { Message, useGetConversationData } from "../../hooks/use-get-messages";
 import {
   getDistanceMeters,
   GEOFENCE_RADIUS_METERS,
@@ -13,6 +13,9 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useSendMessage } from "../../hooks/use-send-message";
 import ConversationMembers from "./components/conversation-members";
 import MessageListSkeleton from "./components/message-skeleton";
+import { createClient } from "@/lib/supabase/client";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { RealtimePostgresInsertPayload } from "@supabase/supabase-js";
 
 const ConversationPage = () => {
   const { conversationId } = useParams();
@@ -22,6 +25,55 @@ const ConversationPage = () => {
     conversationId: conversationId as string,
   });
   const { sendMessage, isLoading: isSending } = useSendMessage();
+
+  const [realtimeMessages, setRealtimeMessages] = useState<Message[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!conversationId) return;
+
+    const client = createClient();
+    console.log(`[Realtime] Subscribing to channel messages:${conversationId}`);
+
+    const channel = client
+      .channel(`messages`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload: RealtimePostgresInsertPayload<Record<string, unknown>>) => {
+          console.log("[Realtime] New message received:", payload.new);
+          const msg = payload.new as unknown as Message;
+          setRealtimeMessages((prev) => [...prev, msg]);
+        }
+      )
+      .subscribe((status, err) => {
+        console.log(`[Realtime] Channel status: ${status}`, err ?? "");
+      });
+
+    return () => {
+      console.log(`[Realtime] Unsubscribing from messages:${conversationId}`);
+      client.removeChannel(channel);
+    };
+  }, [conversationId]);
+
+  useEffect(() => {
+    setRealtimeMessages([]);
+  }, [messages]);
+
+  const allMessages = useMemo(() => {
+    const fetchedIds = new Set(messages.map((m) => m.id));
+    const uniqueRealtime = realtimeMessages.filter((m) => !fetchedIds.has(m.id));
+    return [...messages, ...uniqueRealtime];
+  }, [messages, realtimeMessages]);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [allMessages.length]);
 
   if (!conversationId) {
     return <div>Conversation not found</div>;
@@ -34,10 +86,10 @@ const ConversationPage = () => {
           members={members}
           onMembersChanged={refetch}
         />
-        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide-mobile flex flex-col gap-2 p-2 pb-20">
+        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto scrollbar-hide-mobile flex flex-col gap-2 p-2 pb-20">
           {isLoadingMessages ? (
             <MessageListSkeleton />
-          ) : messages.map((message) => {
+          ) : allMessages.map((message) => {
             const isFromMe = message.sender_id === user?.id;
 
             let isUnlocked = true;
@@ -108,13 +160,7 @@ const ConversationPage = () => {
           <TextEditor
             isLoading={isSending}
             onSend={async (content) => {
-              const success = await sendMessage(
-                conversationId as string,
-                content
-              );
-              if (success) {
-                refetch();
-              }
+              await sendMessage(conversationId as string, content);
             }}
           />
         </div>
