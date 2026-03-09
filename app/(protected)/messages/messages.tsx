@@ -1,7 +1,6 @@
 "use client";
 
 import Conversation from "./components/conversation";
-import NewMessageButton from "./components/new-message-button";
 import NewMessageDrawer from "./components/new-message-drawer";
 import SearchConversations from "./components/search-conversations";
 import { useGetConversations } from "./hooks/use-get-conversations";
@@ -28,8 +27,8 @@ const Messages = () => {
         </div>
         <div className="mt-4 flex justify-end">
           <NewMessageDrawer
-          open={newMessageDrawerOpen}
-          handleIsOpen={handleNewMessageClick}
+            open={newMessageDrawerOpen}
+            handleIsOpen={handleNewMessageClick}
           />
         </div>
       </div>

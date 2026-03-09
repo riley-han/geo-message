@@ -1,5 +1,5 @@
-"use client"
-import { Button } from "@/components/ui/button"
+"use client";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerClose,
@@ -8,29 +8,28 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer"
-import { MessageSquareText } from "lucide-react"
-import SelectContact from './select-contact'
-import { useState } from "react"
-
-
-
+} from "@/components/ui/drawer";
+import { Textarea } from "@/components/ui/textarea";
+import { MessageSquareText } from "lucide-react";
+import SelectContact from "./select-contact";
+import { useState } from "react";
 
 interface NewMessageDrawerProps {
-  open: boolean
-  handleIsOpen: () => void
+  open: boolean;
+  handleIsOpen: () => void;
 }
 
+const NewMessageDrawer = ({ open, handleIsOpen }: NewMessageDrawerProps) => {
+  const [selectedContact, setSelectedContact] = useState<string | undefined>();
+  const [messageText, setMessageText] = useState("")
 
-
-const NewMessageDrawer = ({open, handleIsOpen}: NewMessageDrawerProps) => {
-  const [selectedContact, setSelectedContact] = useState<string | undefined>()
+  console.log(messageText)
 
   return (
-    <Drawer open={open} onOpenChange={handleIsOpen} direction='right'>
+    <Drawer open={open} onOpenChange={handleIsOpen} direction="right">
       <DrawerTrigger asChild>
         <Button variant="outline">
-          <MessageSquareText/>
+          <MessageSquareText />
         </Button>
       </DrawerTrigger>
       <DrawerContent>
@@ -44,7 +43,11 @@ const NewMessageDrawer = ({open, handleIsOpen}: NewMessageDrawerProps) => {
               onChange={setSelectedContact}
             />
 
-
+            <div className="mt-4">
+              <Textarea value={messageText} onChange={(e:React.ChangeEvent<HTMLTextAreaElement>) => {
+                setMessageText(e.target.value)
+              } }/>
+            </div>
           </div>
           <DrawerFooter>
             <Button disabled={!selectedContact}>Submit</Button>
@@ -55,8 +58,7 @@ const NewMessageDrawer = ({open, handleIsOpen}: NewMessageDrawerProps) => {
         </div>
       </DrawerContent>
     </Drawer>
-  )
-}
+  );
+};
 
-
-export default NewMessageDrawer
+export default NewMessageDrawer;
