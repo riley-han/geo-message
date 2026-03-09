@@ -12,6 +12,7 @@ const Messages = () => {
   const handleNewMessageClick = () => {
     setNewMessageDrawerOpen((open) => !open);
   };
+
   return (
     <div className="h-screen">
       <div className="flex flex-col h-[90%] w-full md:w-1/4 md:mx-auto md:max-w-sm">

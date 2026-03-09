@@ -1,33 +1,18 @@
 "use client";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import UnreadNotifications from "./unread-notifications";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 interface ConversationProps {
   title?: string;
-  unReadCount: number;
-  lastMessagePreview?: string;
-  imageUrl?: string;
-  contactName?: string;
-  isGroup: boolean;
   conversationId: string;
 }
 
-const Conversation = ({
-  title,
-  unReadCount,
-  lastMessagePreview,
-  imageUrl,
-  contactName,
-  isGroup,
-  conversationId,
-}: ConversationProps) => {
-  const avatarAltText = isGroup ? title?.charAt(0) : contactName?.charAt(0);
-
+const Conversation = ({ title, conversationId }: ConversationProps) => {
   const router = useRouter();
 
   const handleClick = () => {
     router.push(`messages/conversation/${conversationId}`);
   };
+  const avatarAltText = title?.charAt(0);
 
   return (
     <div
@@ -37,27 +22,14 @@ const Conversation = ({
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <div className="flex-shrink-0">
           <Avatar size="lg">
-            <AvatarImage src={imageUrl} />
             <AvatarFallback>{avatarAltText}</AvatarFallback>
           </Avatar>
         </div>
         <div className="flex flex-col min-w-0 flex-1">
-          <p
-            className="truncate font-medium"
-            title={isGroup ? title : contactName}
-          >
-            {isGroup ? title : contactName}
-          </p>
-          <p
-            className="text-sm text-gray-400 truncate"
-            title={lastMessagePreview}
-          >
-            {lastMessagePreview}
+          <p className="truncate font-medium" title={title}>
+            {title}
           </p>
         </div>
-      </div>
-      <div className="flex-shrink-0">
-        <UnreadNotifications />
       </div>
     </div>
   );
