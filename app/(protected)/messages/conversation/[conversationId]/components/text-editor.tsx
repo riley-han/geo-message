@@ -1,13 +1,11 @@
 import { Textarea } from "@/components/ui/textarea";
 
-
-
 const TextEditor = () => {
-    return (
+  return (
     <div>
-        <Textarea />
+      <Textarea />
     </div>
-    )
-}
+  );
+};
 
 export default TextEditor;

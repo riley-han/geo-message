@@ -17,7 +17,7 @@ export const useCurrentLocation = () => {
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
+    const watchId = navigator.geolocation.watchPosition(
       (position) => {
         setCurrentLocation({
           latitude: position.coords.latitude,
@@ -26,8 +26,13 @@ export const useCurrentLocation = () => {
       },
       () => {
         setCurrentLocation(null);
-      }
+      },
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
     );
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
   }, []);
 
   return currentLocation;
