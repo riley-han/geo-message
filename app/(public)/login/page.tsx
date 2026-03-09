@@ -39,8 +39,8 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200 px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white/80 p-8 shadow-lg ring-1 ring-slate-200 backdrop-blur">
+    <div className="flex min-h-screen items-center justify-center bg-white px-4">
+      <div className="w-full max-w-md rounded-2xl p-8 shadow-md">
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
             Welcome to GeoMessage
