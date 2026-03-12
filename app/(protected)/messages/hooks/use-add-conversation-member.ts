@@ -1,33 +1,25 @@
 "use client";
 
 import { useState } from "react";
+import { addConversationMember as addConversationMemberAction } from "../actions";
 
 export const useAddConversationMember = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const addMember = async (conversationId: string, userId: string) => {
-    setIsLoading(true);
+  const addMember = async (
+    conversationId: string,
+    userId: string
+  ): Promise<boolean> => {
     setError(null);
-
+    setIsLoading(true);
     try {
-      const res = await fetch("/api/conversation/members", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationId, userId }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error ?? "Failed to add member");
+      const result = await addConversationMemberAction(conversationId, userId);
+      if (!result.success) {
+        setError(result.error);
         return false;
       }
-
       return true;
-    } catch {
-      setError("Network error");
-      return false;
     } finally {
       setIsLoading(false);
     }

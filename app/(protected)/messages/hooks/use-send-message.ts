@@ -1,37 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useTransition, useState } from "react";
+import { sendMessage as sendMessageAction } from "../actions";
 
 export const useSendMessage = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const sendMessage = async (conversationId: string, content: string) => {
-    setIsLoading(true);
+  const sendMessage = (conversationId: string, content: string) => {
     setError(null);
-
-    try {
-      const res = await fetch("/api/conversation", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationId, content }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error ?? "Failed to send message");
-        return false;
+    startTransition(async () => {
+      const result = await sendMessageAction(conversationId, content);
+      if (!result.success) {
+        setError(result.error);
       }
-
-      return true;
-    } catch {
-      setError("Network error");
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
+    });
   };
 
-  return { sendMessage, isLoading, error };
+  return { sendMessage, isLoading: isPending, error };
 };
