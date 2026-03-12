@@ -37,7 +37,7 @@ const TextEditor = ({ onSend, isLoading }: TextEditorProps) => {
         >
           {isLoading ? "Sending..." : "Send"}
         </Button>
-        <Button className="bg-slate-500" size="icon-lg" variant="outline">
+        <Button className="bg-blue-200" size="icon-lg" variant="outline">
           <Compass className="size-4" />
         </Button>
       </div>

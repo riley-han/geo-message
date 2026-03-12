@@ -19,6 +19,11 @@ export type Message = {
   } | null;
 };
 
+export type ConversationInfo = {
+  id: string;
+  title: string;
+};
+
 export type conversationRequestParams = {
   conversationId: string;
 };
@@ -26,6 +31,7 @@ export type conversationRequestParams = {
 export const useGetConversationData = (params: conversationRequestParams) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [members, setMembers] = useState<ConversationMember[]>([]);
+  const [conversation, setConversation] = useState<ConversationInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = async () => {
@@ -40,18 +46,22 @@ export const useGetConversationData = (params: conversationRequestParams) => {
       if (!res.ok) {
         setMessages([]);
         setMembers([]);
+        setConversation(null);
         return;
       }
 
       const data = (await res.json()) as {
         messages?: Message[];
         members?: ConversationMember[];
+        conversation?: ConversationInfo | null;
       };
       setMessages(Array.isArray(data.messages) ? data.messages : []);
       setMembers(Array.isArray(data.members) ? data.members : []);
+      setConversation(data.conversation ?? null);
     } catch {
       setMessages([]);
       setMembers([]);
+      setConversation(null);
     }
   };
 
@@ -63,5 +73,5 @@ export const useGetConversationData = (params: conversationRequestParams) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.conversationId]);
 
-  return { messages, members, isLoading, refetch: fetchData };
+  return { messages, members, conversation, isLoading, refetch: fetchData };
 };

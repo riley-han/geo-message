@@ -17,7 +17,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const conversationId = searchParams.get("conversationId");
 
-  const [messagesResult, membersResult] = await Promise.all([
+  const [messagesResult, membersResult, conversationResult] = await Promise.all([
     supabase
       .from("messages")
       .select(
@@ -29,6 +29,11 @@ export async function GET(request: Request) {
       .from("conversation_members")
       .select("id, user_id, created_at, profiles:user_id(display_name)")
       .eq("conversation_id", conversationId),
+    supabase
+      .from("conversations")
+      .select("id, title")
+      .eq("id", conversationId)
+      .single(),
   ]);
 
   if (messagesResult.error) {
@@ -42,5 +47,6 @@ export async function GET(request: Request) {
   return NextResponse.json({
     messages: messagesResult.data ?? [],
     members: membersResult.data ?? [],
+    conversation: conversationResult.data ?? null,
   });
 }
