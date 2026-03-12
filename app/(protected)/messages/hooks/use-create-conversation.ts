@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createConversation as createConversationAction } from "../actions";
 
 type Conversation = {
   id: string;
@@ -14,26 +15,16 @@ export const useCreateConversation = () => {
   const createConversation = async (
     title: string
   ): Promise<Conversation | null> => {
-    setIsLoading(true);
     setError(null);
-
+    setIsLoading(true);
     try {
-      const res = await fetch("/api/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error ?? "Failed to create conversation");
-        return null;
+      const result = await createConversationAction(title);
+      if (result.success && result.data) {
+        return result.data;
       }
-
-      return data.conversation as Conversation;
-    } catch {
-      setError("Network error");
+      if (!result.success) {
+        setError(result.error);
+      }
       return null;
     } finally {
       setIsLoading(false);

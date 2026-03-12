@@ -16,12 +16,13 @@ import MessageListSkeleton from "./components/message-skeleton";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { RealtimePostgresInsertPayload } from "@supabase/supabase-js";
+import { FloatingBackButton } from "@/components/floating-back-button";
 
 const ConversationPage = () => {
   const { conversationId } = useParams();
   const { user } = useCurrentUser();
   const currentLocation = useCurrentLocation();
-  const { messages, members, isLoading: isLoadingMessages, refetch } = useGetConversationData({
+  const { messages, members, conversation, isLoading: isLoadingMessages, refetch } = useGetConversationData({
     conversationId: conversationId as string,
   });
   const { sendMessage, isLoading: isSending } = useSendMessage();
@@ -97,8 +98,14 @@ const ConversationPage = () => {
     return <div>Conversation not found</div>;
   }
   return (
-    <div className="h-screen">
-      <div className="flex flex-col h-screen w-full sm:w-full md:w-1/4 md:mx-auto md:max-w-sm">
+    <div className="h-full min-h-0 flex flex-col">
+      <FloatingBackButton />
+      <div className="flex flex-col flex-1 min-h-0 w-full sm:w-full md:w-1/4 md:mx-auto md:max-w-sm">
+        {conversation?.title && (
+          <h1 className="flex-shrink-0 border-b px-3 py-2 text-lg font-semibold truncate text-right">
+            {conversation.title}
+          </h1>
+        )}
         <ConversationMembers
           conversationId={conversationId as string}
           members={members}

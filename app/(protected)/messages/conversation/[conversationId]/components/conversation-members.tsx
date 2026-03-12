@@ -16,6 +16,7 @@ import {
 import type { ConversationMember } from "../../../hooks/use-get-conversation-members";
 import type { Profile } from "../../../hooks/use-get-profiles";
 import { useAddConversationMember } from "../../../hooks/use-add-conversation-member";
+import { leaveConversation } from "../../../actions";
 
 interface ConversationMembersProps {
   conversationId: string;
@@ -46,11 +47,8 @@ const ConversationMembers = ({ conversationId, members, onMembersChanged }: Conv
   const handleLeave = async () => {
     setIsLeaving(true);
     try {
-      const res = await fetch(
-        `/api/conversation/members?conversationId=${conversationId}`,
-        { method: "DELETE" }
-      );
-      if (res.ok) {
+      const result = await leaveConversation(conversationId);
+      if (result.success) {
         router.push("/messages");
       }
     } finally {
@@ -86,7 +84,7 @@ const ConversationMembers = ({ conversationId, members, onMembersChanged }: Conv
         {members.map((member) => (
           <span
             key={member.id}
-            className="flex-shrink-0 rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium"
+            className="flex-shrink-0 rounded-full bg-blue-200 px-2.5 py-0.5 text-xs font-medium"
           >
             {member.profiles?.display_name ?? "Unknown"}
           </span>
