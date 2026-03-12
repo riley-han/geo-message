@@ -16,6 +16,7 @@ import MessageListSkeleton from "./components/message-skeleton";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { RealtimePostgresInsertPayload } from "@supabase/supabase-js";
+import { FloatingBackButton } from "@/components/floating-back-button";
 
 const ConversationPage = () => {
   const { conversationId } = useParams();
@@ -98,6 +99,7 @@ const ConversationPage = () => {
   }
   return (
     <div className="h-full min-h-0 flex flex-col">
+      <FloatingBackButton />
       <div className="flex flex-col flex-1 min-h-0 w-full sm:w-full md:w-1/4 md:mx-auto md:max-w-sm">
         {conversation?.title && (
           <h1 className="flex-shrink-0 border-b px-3 py-2 text-lg font-semibold truncate text-right">
